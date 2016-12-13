@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 # import the necessary packages
-from pyimagesearch.transform import four_point_transform
-from pyimagesearch import imutils
-from skimage.filters import threshold_adaptive
+#from pyimagesearch.transform import four_point_transform
+#from pyimagesearch import imutils
+#from skimage.filters import threshold_adaptive
 import numpy as np
+import scipy.ndimage as nd
 import argparse
 import cv2
 import matplotlib
 import time
 import rect
+from skimage import data, morphology, filter as imfilter
  
 # construct the argument parser and parse the arguments
 #ap = argparse.ArgumentParser()
@@ -25,15 +27,23 @@ orig = image.copy()
  
 # convert the image to grayscale, blur it, and find edges
 # in the image
+dst = np.zeros(image.shape, image.dtype)
+for i in xrange(image.shape[2]):
+    dst[:, :, i] = nd.gaussian_filter(image[:, :, i], 5)
+
 gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 gray = cv2.GaussianBlur(gray, (5, 5), 0)
 edged = cv2.Canny(gray, 75, 200)
+
+# scikit-image
+dst = imfilter.gaussian_filter(image, 5, multichannel=True)
  
 # show the original image and the edge detected image
 print "STEP 1: Edge Detection"
 print image.shape
 #cv2.imshow("Image", image)
 cv2.imshow("Edged", edged)
+cv2.imshow("Gauss", dst)
 #cv2.waitKey(0)
 #cv2.destroyAllWindows()
 # find the contours in the edged image, keeping only the
